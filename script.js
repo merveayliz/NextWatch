@@ -189,20 +189,27 @@ function closeModal() {
     document.body.style.overflow = 'auto';
 }
 
-function addComment() {
+async function addComment() {
     const input = document.getElementById('user-comment');
     const movieId = document.getElementById('movie-modal').getAttribute('data-current-id');
     const user = currentUser || "Misafir";
     
     if(!input || input.value.trim() === "") return;
 
-    const savedComments = JSON.parse(localStorage.getItem(`comments_${movieId}`)) || [];
-    savedComments.unshift({ user: user, text: input.value }); 
-    
-    localStorage.setItem(`comments_${movieId}`, JSON.stringify(savedComments));
-    openDetails(parseInt(movieId)); 
-    input.value = "";
+    try {
+        await addDoc(collection(db, "comments"), {
+            movieId: movieId,
+            user: user,
+            text: input.value,
+            createdAt: serverTimestamp()
+        });
+        input.value = ""; 
+    } catch (e) {
+        console.error("Hata oluştu: ", e);
+        alert("Yorum gönderilemedi, kuralları kontrol et!");
+    }
 }
+window.addComment = addComment; 
 
 const profileLink = document.querySelector('.profile-link');
 if(profileLink) {
@@ -320,5 +327,6 @@ window.addEventListener('DOMContentLoaded', () => {
     }, 2000); 
 
 });
+
 
 
