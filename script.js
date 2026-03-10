@@ -339,6 +339,16 @@ window.addEventListener('DOMContentLoaded', () => {
 
 });
 
+window.addComment = addComment;
+window.openDetails = openDetails;
+window.closeModal = closeModal;
+window.setMainFilter = setMainFilter;
+window.filterByGenre = filterByGenre;
+window.addToWatchlist = addToWatchlist;
+window.showFavorites = showFavorites;
+window.toggleAuthMode = toggleAuthMode;
+window.handleAuth = handleAuth;
+window.closeAuthModal = closeAuthModal;
 
 
 
