@@ -50,6 +50,21 @@ const movies = [
     { id: 49, title: "Leyla ile Mecnun", year: 2011, rating: 9.1, genre: "Komedi", image: "img/leyla-mecnun.jpg", type: "Dizi", desc: "Aynı gün aynı hastanede doğan ve beşikleri yan yana konan iki bebeğin kaderi birleşir. Kireçburnu sahilinde geçen absürt olaylar, derin dostluklar ve imkansız bir aşkın hikayesi. Türk televizyon tarihinin en özgün ve duygusal komedi yapımı." },
     { id: 50, title: "Çukur", year: 2017, rating: 7.4, genre: "Aksiyon", image: "img/cukur.jpg", type: "Dizi", desc: "İstanbul'un en belalı mahallelerinden biri olan Çukur, Koçovalı ailesinin koruması altındadır. Yamaç, ailesini ve mahallesini korumak için kaçtığı bu dünyaya geri dönmek zorunda kalır. Çukur'da hayatta kalmak için kurallar bellidir: Aile her şeydir." },
     { id: 51, title: "Masum", year: 2017, rating: 8.5, genre: "Suç", image: "img/masum.jpg", type: "Dizi", desc: "Emekli bir komiser olan Cevdet ve ailesi, sakin bir hayat sürmek için kasabaya çekilir. Ancak büyük oğullarının gelişiyle saklanan sırlar ve karanlık bir cinayet davası gün yüzüne çıkar. Adalet ve aile sevgisi arasındaki o ince çizginin hikayesi." }
+    { id: 52, title: "Breaking Bad", year: 2008, rating: 9.5, genre: "Suç", image: "img/breaking-bad.jpg", type: "Dizi", desc: "Lisede kimya öğretmeni olan Walter White, ölümcül bir hastalık teşhisi aldıktan sonra ailesine para bırakabilmek için eski öğrencisiyle birlikte uyuşturucu üretmeye başlar." },
+    { id: 53, title: "Game of Thrones", year: 2011, rating: 9.2, genre: "Fantastik", image: "img/game-of-thrones.jpg", type: "Dizi", desc: "Demir Taht için verilen büyük mücadelede krallıklar, ihanetler ve savaşlar iç içe geçer. Westeros'ta güç ve hayatta kalma savaşı başlar." },
+    { id: 54, title: "Stranger Things", year: 2016, rating: 8.7, genre: "Bilim Kurgu", image: "img/stranger-things.jpg", type: "Dizi", desc: "Küçük bir kasabada kaybolan bir çocuk sonrası ortaya çıkan doğaüstü olaylar ve gizli hükümet deneyleri bir grup çocuğun hayatını değiştirir." },
+    { id: 55, title: "Money Heist", year: 2017, rating: 8.2, genre: "Suç", image: "img/money-heist.jpg", type: "Dizi", desc: "Profesör lakaplı bir deha, İspanya Kraliyet Darphanesi'ni soymak için birbirini tanımayan insanlardan oluşan bir ekip kurar." },
+    { id: 56, title: "Dark", year: 2017, rating: 8.8, genre: "Bilim Kurgu", image: "img/dark.jpg", type: "Dizi", desc: "Almanya'nın küçük bir kasabasında iki çocuğun kaybolmasıyla başlayan olaylar, zaman yolculuğu ve karmaşık aile sırlarını ortaya çıkarır." },
+    { id: 57, title: "The Witcher", year: 2019, rating: 8.1, genre: "Fantastik", image: "img/witcher.jpg", type: "Dizi", desc: "Canavar avcısı Geralt of Rivia, kaderlerin iç içe geçtiği bir dünyada prensesler, büyücüler ve krallar arasında hayatta kalmaya çalışır." },
+    { id: 58, title: "Prison Break", year: 2005, rating: 8.3, genre: "Aksiyon", image: "img/prison-break.jpg", type: "Dizi", desc: "Kardeşinin haksız yere idam cezası alması üzerine Michael Scofield, onu hapishaneden kaçırmak için karmaşık bir plan yapar." },
+    { id: 59, title: "The Godfather", year: 1972, rating: 9.2, genre: "Suç", image: "img/godfather.jpg", type: "Film", desc: "Corleone ailesinin mafya dünyasındaki yükselişi ve aile içindeki güç mücadelesini anlatan sinema tarihinin en önemli filmlerinden biri." },
+    { id: 60, title: "Pulp Fiction", year: 1994, rating: 8.9, genre: "Suç", image: "img/pulp-fiction.jpg", type: "Film", desc: "Birbirine bağlı suç hikayeleri, sıra dışı karakterler ve unutulmaz diyaloglarla dolu kült bir film." },
+    { id: 61, title: "The Prestige", year: 2006, rating: 8.5, genre: "Dram", image: "img/prestige.jpg", type: "Film", desc: "İki sihirbazın rekabeti zamanla takıntıya dönüşür ve birbirlerini alt etmek için tehlikeli oyunlara girişirler." },
+    { id: 62, title: "Se7en", year: 1995, rating: 8.6, genre: "Gerilim", image: "img/se7en.jpg", type: "Film", desc: "İki dedektif, yedi ölümcül günahı temsil eden cinayetler işleyen bir seri katilin peşine düşer." },
+    { id: 63, title: "The Pianist", year: 2002, rating: 8.5, genre: "Dram", image: "img/pianist.jpg", type: "Film", desc: "II. Dünya Savaşı sırasında Varşova'da hayatta kalmaya çalışan Yahudi bir piyanistin gerçek hikayesi." },
+    { id: 64, title: "Gladiator", year: 2000, rating: 8.5, genre: "Aksiyon", image: "img/gladiator.jpg", type: "Film", desc: "Roma İmparatorluğu'nda ihanete uğrayan bir general, gladyatör olarak arenaya çıkar ve intikamını almak için savaşır." },
+    { id: 65, title: "Dune", year: 2021, rating: 8.0, genre: "Bilim Kurgu", image: "img/dune.jpg", type: "Film", desc: "Uzak bir gelecekte genç Paul Atreides, evrenin en değerli kaynağı için verilen mücadelede kaderini keşfeder." },
+    { id: 66, title: "Joker", year: 2019, rating: 8.4, genre: "Dram", image: "img/joker.jpg", type: "Film", desc: "Toplum tarafından dışlanan Arthur Fleck'in yavaş yavaş Gotham'ın en korkulan suçlularından biri olan Joker'e dönüşmesini anlatır." }
 ];
 
 let currentType = 'all'; 
@@ -301,4 +316,5 @@ window.addEventListener('DOMContentLoaded', () => {
             document.body.style.overflowX = 'hidden';
         }, 800); 
     }, 2000); 
+
 });
