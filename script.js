@@ -1,5 +1,6 @@
-import { db } from './firebase-config.js';
-import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "firebase/firestore";
+
+import { db } from '.firebase-config.js';
+import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 const movies = [
     { id: 1, title: "Interstellar", year: 2014, rating: 8.7, genre: "Bilim Kurgu", image: "img/interstellar.jpg", type: "Film", desc: "Dünya yaşanmaz bir hal alınca bir grup astronot yeni bir yuva bulmak için yola çıkar. Satürn yakınlarındaki bir solucan deliğinden geçerek bilinmez galaksilere adım atarlar. Zaman ve sevginin boyutlarını aşan epik bir yolculuk başlar." },
     { id: 2, title: "Inception", year: 2010, rating: 8.8, genre: "Aksiyon", image: "img/inception.jpg", type: "Dizi", desc: "Rüyalar alemi, bir hırsızın en değerli sırları çalabileceği en savunmasız yerdir. Dom Cobb, bu tehlikeli dünyada bir fikri çalmak yerine onu yerleştirmekle görevlendirilir. Gerçeklik ile rüya arasındaki çizgi hiç bu kadar bulanık olmamıştı." },
@@ -349,6 +350,7 @@ window.showFavorites = showFavorites;
 window.toggleAuthMode = toggleAuthMode;
 window.handleAuth = handleAuth;
 window.closeAuthModal = closeAuthModal;
+
 
 
 
