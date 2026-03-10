@@ -183,20 +183,21 @@ function closeModal() {
     document.getElementById('movie-modal').style.display = "none";
     document.body.style.overflow = 'auto';
 }
-
 async function addComment() {
     const input = document.getElementById('user-comment');
     const movieId = document.getElementById('movie-modal').getAttribute('data-current-id');
-    const user = currentUser || "Misafir";
-    if(!input || input.value.trim() === "") return;
-
+    
     try {
         await addDoc(collection(db, "comments"), {
-            movieId: movieId, user: user, text: input.value, createdAt: serverTimestamp()
+            movieId: movieId,
+            user: currentUser || "Misafir",
+            text: input.value,
+            createdAt: serverTimestamp()
         });
         input.value = ""; 
     } catch (e) {
-        alert("Yorum gönderilemedi!");
+        console.error("Hata: ", e);
+        alert("Yorum veritabanına kaydedilemedi! Firestore açık mı?");
     }
 }
 
@@ -226,7 +227,6 @@ function closeAuthModal() {
     document.getElementById('auth-modal').style.display = "none"; 
 }
 
-// 6. Başlangıç Animasyonu ve Eventler
 window.addEventListener('DOMContentLoaded', () => {
     const logo = document.getElementById('main-logo');
     const wrapper = document.getElementById('site-wrapper');
