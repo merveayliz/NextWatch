@@ -174,10 +174,21 @@ function openDetails(id) {
     document.getElementById('modal-meta').innerText = `${movie.year} | ${movie.genre} | IMDB: ${movie.rating}`;
     document.getElementById('modal-desc').innerText = movie.desc;
     
-    const savedComments = JSON.parse(localStorage.getItem(`comments_${id}`)) || [];
-    const list = document.getElementById('comments-list');
-    let html = savedComments.map(c => `<div class="single-comment"><strong>@${c.user}:</strong> ${c.text}</div>`).join('');
-    list.innerHTML = html || `<p style="opacity:0.5; padding:10px;">Henüz yorum yok. İlk sen yaz!</p>`;
+    const q = query(collection(db, "comments"), orderBy("createdAt", "desc"));
+    
+   onSnapshot(q, (snapshot) => {
+        const list = document.getElementById('comments-list');
+        let html = "";
+        
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            if(data.movieId == id) {
+                html += `<div class="single-comment"><strong>@${data.user}:</strong> ${data.text}</div>`;
+            }
+        });
+        
+        list.innerHTML = html || `<p style="opacity:0.5; padding:10px;">Henüz yorum yok. İlk sen yaz!</p>`;
+    });
 
     document.getElementById('movie-modal').setAttribute('data-current-id', id);
     document.getElementById('movie-modal').style.display = "block";
@@ -327,6 +338,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }, 2000); 
 
 });
+
 
 
 
