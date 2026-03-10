@@ -69,7 +69,6 @@ const movies = [
     { id: 65, title: "Dune", year: 2021, rating: 8.0, genre: "Bilim Kurgu", image: "img/dune.jpg", type: "Film", desc: "Uzak bir gelecekte genç Paul Atreides, evrenin en değerli kaynağı için verilen mücadelede kaderini keşfeder." },
     { id: 66, title: "Joker", year: 2019, rating: 8.4, genre: "Dram", image: "img/joker.jpg", type: "Film", desc: "Toplum tarafından dışlanan Arthur Fleck'in yavaş yavaş Gotham'ın en korkulan suçlularından biri olan Joker'e dönüşmesini anlatır." }
 ];
-
 let currentType = 'all'; 
 let currentGenre = 'all'; 
 let isLoginMode = true;
@@ -87,7 +86,6 @@ function renderCards(data) {
     let cardsHTML = ""; 
     data.forEach(movie => {
         const isFav = watchlist.includes(movie.id);
-        
         cardsHTML += `
             <div class="movie-card" onclick="openDetails(${movie.id})">
                 <div class="card-image">
@@ -106,8 +104,7 @@ function renderCards(data) {
                     </div>
                     <span class="genre">${movie.genre}</span>
                 </div>
-            </div>
-        `;
+            </div>`;
     });
     movieGrid.innerHTML = cardsHTML;
 }
@@ -115,7 +112,6 @@ function renderCards(data) {
 function setMainFilter(type, element) {
     document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
     if(element) element.classList.add('active');
-    
     currentType = type; 
     applyFilters();
 }
@@ -129,43 +125,33 @@ function applyFilters() {
     const movieGrid = document.getElementById('movie-grid');
     if(!movieGrid) return;
 
+    let filtered;
     if(currentType === 'favorites') {
-        const favorites = movies.filter(m => watchlist.includes(m.id));
-        if (favorites.length === 0) {
-            movieGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 50px; opacity: 0.6;">
-                <i class="far fa-heart" style="font-size: 3rem; margin-bottom: 15px;"></i>
-                <p>Favori listen boş kanka!</p></div>`;
-        } else {
-            renderCards(favorites);
-        }
-        return;
+        filtered = movies.filter(m => watchlist.includes(m.id));
+    } else {
+        filtered = movies.filter(item => {
+            const typeMatch = (currentType === 'all' || item.type === currentType);
+            const genreMatch = (currentGenre === 'all' || item.genre === currentGenre);
+            return typeMatch && genreMatch;
+        });
     }
 
-    const filtered = movies.filter(item => {
-        const typeMatch = (currentType === 'all' || item.type === currentType);
-        const genreMatch = (currentGenre === 'all' || item.genre === currentGenre);
-        return typeMatch && genreMatch;
-    });
-
     if (filtered.length === 0) {
-        movieGrid.innerHTML = "<p style='grid-column: 1/-1; text-align: center; padding: 50px; opacity: 0.5;'>İçerik bulunamadı.</p>";
+        const message = currentType === 'favorites' ? "Favori listen boş kanka!" : "İçerik bulunamadı.";
+        movieGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 50px; opacity: 0.5;"><p>${message}</p></div>`;
     } else {
         renderCards(filtered);
     }
 }
+
 function addToWatchlist(id) {
     const index = watchlist.indexOf(id);
-    
-    if (index === -1) {
-        watchlist.push(id);
-    } else {
-        watchlist.splice(index, 1);
-    }
-
+    if (index === -1) watchlist.push(id);
+    else watchlist.splice(index, 1);
     localStorage.setItem('nextwatch_favorites', JSON.stringify(watchlist));
-    
     applyFilters(); 
 }
+
 function openDetails(id) {
     const movie = movies.find(m => m.id === id);
     if(!movie) return;
@@ -176,19 +162,16 @@ function openDetails(id) {
     document.getElementById('modal-desc').innerText = movie.desc;
     
     const q = query(collection(db, "comments"), orderBy("createdAt", "desc"));
-    
-   onSnapshot(q, (snapshot) => {
+    onSnapshot(q, (snapshot) => {
         const list = document.getElementById('comments-list');
         let html = "";
-        
         snapshot.forEach((doc) => {
             const data = doc.data();
             if(data.movieId == id) {
                 html += `<div class="single-comment"><strong>@${data.user}:</strong> ${data.text}</div>`;
             }
         });
-        
-        list.innerHTML = html || `<p style="opacity:0.5; padding:10px;">Henüz yorum yok. İlk sen yaz!</p>`;
+        list.innerHTML = html || `<p style="opacity:0.5; padding:10px;">Henüz yorum yok.</p>`;
     });
 
     document.getElementById('movie-modal').setAttribute('data-current-id', id);
@@ -205,30 +188,24 @@ async function addComment() {
     const input = document.getElementById('user-comment');
     const movieId = document.getElementById('movie-modal').getAttribute('data-current-id');
     const user = currentUser || "Misafir";
-    
     if(!input || input.value.trim() === "") return;
 
     try {
         await addDoc(collection(db, "comments"), {
-            movieId: movieId,
-            user: user,
-            text: input.value,
-            createdAt: serverTimestamp()
+            movieId: movieId, user: user, text: input.value, createdAt: serverTimestamp()
         });
         input.value = ""; 
     } catch (e) {
-        console.error("Hata oluştu: ", e);
-        alert("Yorum gönderilemedi, kuralları kontrol et!");
+        alert("Yorum gönderilemedi!");
     }
 }
-window.addComment = addComment; 
 
 const profileLink = document.querySelector('.profile-link');
 if(profileLink) {
     profileLink.onclick = (e) => {
         e.preventDefault();
         if(currentUser) {
-            if(confirm(`Merhaba ${currentUser}, çıkış yapmak istiyor musun?`)) {
+            if(confirm(`Çıkış yapılsın mı ${currentUser}?`)) {
                 localStorage.removeItem('activeUser');
                 location.reload();
             }
@@ -238,20 +215,10 @@ if(profileLink) {
     };
 }
 
-function toggleAuthMode() {
-    isLoginMode = !isLoginMode;
-    document.getElementById('auth-title').innerText = isLoginMode ? "Giriş Yap" : "Kayıt Ol";
-    document.getElementById('auth-submit').innerText = isLoginMode ? "Giriş Yap" : "Kayıt Ol";
-    document.getElementById('auth-toggle').innerHTML = isLoginMode ? 
-        'Hesabın yok mu? <a href="#" onclick="toggleAuthMode()">Kayıt Ol</a>' : 
-        'Zaten hesabın var mı? <a href="#" onclick="toggleAuthMode()">Giriş Yap</a>';
-}
-
 function handleAuth() {
     const user = document.getElementById('username').value;
     if(!user) return alert("İsim yaz kanka!");
     localStorage.setItem('activeUser', user);
-    alert(`Hoş geldin ${user}!`);
     location.reload();
 }
 
@@ -259,6 +226,7 @@ function closeAuthModal() {
     document.getElementById('auth-modal').style.display = "none"; 
 }
 
+// 6. Başlangıç Animasyonu ve Eventler
 window.addEventListener('DOMContentLoaded', () => {
     const logo = document.getElementById('main-logo');
     const wrapper = document.getElementById('site-wrapper');
@@ -271,6 +239,7 @@ window.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             if(wrapper) wrapper.classList.add('show-content');
             displayMovies(); 
+            document.body.style.overflow = 'auto'; 
         }, 800); 
     }, 2000); 
 });
@@ -280,77 +249,13 @@ window.onclick = function(event) {
     if (event.target == document.getElementById('auth-modal')) closeAuthModal();
 }
 
-function showFavorites(element) {
-    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-    if(element) element.classList.add('active');
-
-    currentType = 'favorites'; 
-    applyFilters();
-}
-
-function applyFilters() {
-    const movieGrid = document.getElementById('movie-grid');
-    if(!movieGrid) return;
-
-    let filtered;
-
-    if(currentType === 'favorites') {
-        filtered = movies.filter(m => watchlist.includes(m.id));
-    } else {
-        filtered = movies.filter(item => {
-            const typeMatch = (currentType === 'all' || item.type === currentType);
-            const genreMatch = (currentGenre === 'all' || item.genre === currentGenre);
-            return typeMatch && genreMatch;
-        });
-    }
-
-    movieGrid.innerHTML = "";
-
-    if (filtered.length === 0) {
-        const message = currentType === 'favorites' 
-            ? "Favori listen henüz boş kanka. Kalbe bas, burayı doldur!" 
-            : "Aradığın kriterde içerik bulunamadı.";
-            
-        movieGrid.innerHTML = `
-            <div style="grid-column: 1/-1; text-align: center; padding: 80px 20px; opacity: 0.5;">
-                <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 20px;"></i>
-                <p>${message}</p>
-            </div>`;
-    } else {
-        renderCards(filtered);
-    }
-}
-window.addEventListener('DOMContentLoaded', () => {
-    const logo = document.getElementById('main-logo');
-    const wrapper = document.getElementById('site-wrapper');
-
-    setTimeout(() => {
-        if(logo) {
-            logo.classList.remove('logo-center');
-            logo.classList.add('logo-nav');
-        }
-        setTimeout(() => {
-            if(wrapper) wrapper.classList.add('show-content');
-            displayMovies(); 
-        
-            document.body.style.overflow = 'auto'; 
-            document.body.style.overflowX = 'hidden';
-        }, 800); 
-    }, 2000); 
-
-});
-
 window.addComment = addComment;
 window.openDetails = openDetails;
 window.closeModal = closeModal;
 window.setMainFilter = setMainFilter;
 window.filterByGenre = filterByGenre;
 window.addToWatchlist = addToWatchlist;
-window.showFavorites = showFavorites;
-window.toggleAuthMode = toggleAuthMode;
 window.handleAuth = handleAuth;
 window.closeAuthModal = closeAuthModal;
-
-
 
 
