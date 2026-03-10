@@ -257,6 +257,7 @@ window.filterByGenre = filterByGenre;
 window.addToWatchlist = addToWatchlist;
 window.handleAuth = handleAuth;
 window.closeAuthModal = closeAuthModal;
+window.showFavorites = showFavorites;
 
 
 
