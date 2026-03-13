@@ -13,6 +13,15 @@ body {
     overflow: hidden;
 }
 
+/* Scrollbar Tasarımı (Daha şık bir görünüm için) */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-color); }
+::-webkit-scrollbar-thumb { 
+    background: #2d3748; 
+    border-radius: 10px; 
+}
+::-webkit-scrollbar-thumb:hover { background: var(--primary-blue); }
+
 #main-logo {
     position: fixed;
     color: var(--primary-blue);
@@ -478,4 +487,77 @@ header {
         font-size: 0.75rem;
         padding: 8px;
     }
+}
+
+.mobile-smooth-reveal {
+   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+   will-change: transform, opacity;
+}
+.single-comment {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    animation: fadeInSlide 0.4s ease forwards;
+}
+.single-comment:hover {
+    border-color: var(--primary-blue);
+    background: rgba(0, 210, 255, 0.05);
+    transform: translateX(5px);
+}
+@keyframes fadeInSlide {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.comment-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 8px;
+    font-size: 0.8rem;
+}
+
+.action-btn {
+    cursor: pointer;
+    color: #94a3b8;
+    transition: 0.2s;
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.action-btn:hover { color: #6366f1; }
+.action-btn.liked { color: #ef4444; }
+
+.reply-input-wrapper {
+    margin-top: 10px;
+    margin-left: 20px;
+    display: none; 
+}
+
+.reply-input-wrapper input {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    width: 70%;
+    font-size: 0.8rem;
+}
+
+.replies-container {
+    margin-left: 20px;
+    border-left: 2px solid #334155;
+    padding-left: 10px;
+    margin-top: 8px;
+}
+
+.single-reply {
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+    color: #cbd5e1;
 }
