@@ -310,11 +310,4 @@ window.onclick = function(event) {
         if (currentUnsubscribe) currentUnsubscribe();
     }
 }
-window.onclick = function(event) {
-    if (event.target.classList.contains('modal')) {
-        event.target.style.display = "none";
-        document.body.style.overflow = 'auto';
-    }
-
-}
 
