@@ -1,8 +1,3 @@
-const firebaseConfig = JSON.parse(__firebase_config);
-const app = firebase.initializeApp(firebaseConfig);
-const auth = firebase.getAuth(app);
-const db = firebase.getFirestore(app);
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'nextwatch-v1';
 
 const movies = [
     { id: 1, title: "Interstellar", year: 2014, rating: 8.7, genre: "Bilim Kurgu", image: "img/interstellar.jpg", type: "Film", desc: "Dünya yaşanmaz bir hal alınca bir grup astronot yeni bir yuva bulmak için yola çıkar. Satürn yakınlarındaki bir solucan deliğinden geçerek bilinmez galaksilere adım atarlar. Zaman ve sevginin boyutlarını aşan epik bir yolculuk başlar." },
@@ -322,3 +317,4 @@ window.onclick = function(event) {
     }
 
 }
+
