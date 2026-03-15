@@ -172,10 +172,8 @@ function openDetails(id) {
 
 let currentUnsubscribe = null;
 function listenToComments(movieId) {
-    // Önceki dinleyiciyi temizle
+    
     if (currentUnsubscribe) currentUnsubscribe();
-
-    const commentsRef = firebase.collection(db, 'artifacts', appId, 'public', 'data', `comments_${movieId}`);
     
     currentUnsubscribe = firebase.onSnapshot(commentsRef, (snapshot) => {
         const list = document.getElementById('comments-list');
