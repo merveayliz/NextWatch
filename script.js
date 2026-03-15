@@ -1,29 +1,10 @@
+
+// 1. MODÜLLERİ İÇERİ ALMA
+// Firebase'in sunduğu özellikleri ve kendi ayarlarımızı çekiyoruz.
 import { 
-    collection, 
-    addDoc, 
-    onSnapshot, 
-    query, 
-    orderBy, 
-    doc, 
-    getDoc, 
-    updateDoc 
+    collection, addDoc, onSnapshot, query, orderBy, doc, getDoc, updateDoc 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { db } from "./firebase-config.js";
-
-window.setMainFilter = setMainFilter;
-window.filterByGenre = filterByGenre;
-window.showFavorites = showFavorites;
-window.toggleWatchlist = toggleWatchlist;
-window.openDetails = openDetails;
-window.addComment = addComment;
-window.toggleLike = toggleLike;
-window.addReply = addReply;
-window.showReplyInput = showReplyInput;
-window.handleAuth = handleAuth;
-window.closeModal = () => {
-    document.getElementById('movie-modal').style.display = "none";
-    document.body.style.overflow = 'auto';
-};
 const movies = [
     { id: 1, title: "Interstellar", year: 2014, rating: 8.7, genre: "Bilim Kurgu", image: "img/interstellar.jpg", type: "Film", desc: "Dünya yaşanmaz bir hal alınca bir grup astronot yeni bir yuva bulmak için yola çıkar. Satürn yakınlarındaki bir solucan deliğinden geçerek bilinmez galaksilere adım atarlar. Zaman ve sevginin boyutlarını aşan epik bir yolculuk başlar." },
     { id: 2, title: "Inception", year: 2010, rating: 8.8, genre: "Aksiyon", image: "img/inception.jpg", type: "Dizi", desc: "Rüyalar alemi, bir hırsızın en değerli sırları çalabileceği en savunmasız yerdir. Dom Cobb, bu tehlikeli dünyada bir fikri çalmak yerine onu yerleştirmekle görevlendirilir. Gerçeklik ile rüya arasındaki çizgi hiç bu kadar bulanık olmamıştı." },
@@ -97,20 +78,9 @@ let currentType = 'all';
 let currentGenre = 'all'; 
 let watchlist = JSON.parse(localStorage.getItem('nextwatch_favorites')) || [];
 let currentUser = localStorage.getItem('activeUser') || null;
-let currentAuthUser = null;
+let currentUnsubscribe = null; // Yorum dinleyicisini kapatmak için
 
-const initAuth = async () => {
-    try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-            await firebase.signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-            await firebase.signInAnonymously(auth);
-        }
-    } catch (err) { console.error("Auth Hatası:", err); }
-};
-
-
-initAuth();
+// 3. ANA FONKSİYONLAR (FİLTRELEME VE GÖSTERİM)
 
 function applyFilters() {
     const movieGrid = document.getElementById('movie-grid');
@@ -123,11 +93,7 @@ function applyFilters() {
         return typeMatch && genreMatch;
     });
 
-    if (filtered.length === 0) {
-        movieGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 80px; opacity: 0.5;"><p>İçerik bulunamadı.</p></div>`;
-    } else {
-        renderCards(filtered);
-    }
+    renderCards(filtered);
 }
 
 function renderCards(data) {
@@ -153,6 +119,8 @@ function renderCards(data) {
     }).join('');
 }
 
+// 4. MODAL VE DETAYLAR
+
 function openDetails(id) {
     const movie = movies.find(m => m.id === id);
     if(!movie) return;
@@ -163,137 +131,78 @@ function openDetails(id) {
     document.getElementById('modal-desc').innerText = movie.desc;
     document.getElementById('movie-modal').setAttribute('data-current-id', id);
     
-    listenToComments(id);
+    listenToComments(id); // Yorumları yükle
     
     document.getElementById('movie-modal').style.display = "block";
     document.body.style.overflow = 'hidden';
 }
 
-let currentUnsubscribe = null;
+function openAuthModal() {
+    document.getElementById('auth-modal').style.display = 'flex';
+}
+
+// 5. FIREBASE YORUM SİSTEMİ
+
 function listenToComments(movieId) {
+    if (currentUnsubscribe) currentUnsubscribe(); // Eski dinleyiciyi temizle
     
-    if (currentUnsubscribe) currentUnsubscribe();
-    
-    currentUnsubscribe = firebase.onSnapshot(commentsRef, (snapshot) => {
+    // Firestore'da 'comments/movie_66/items' gibi bir yola bakar
+    const commentsRef = collection(db, 'comments', `movie_${movieId}`, 'items');
+    const q = query(commentsRef, orderBy("timestamp", "desc"));
+
+    currentUnsubscribe = onSnapshot(q, (snapshot) => {
         const list = document.getElementById('comments-list');
-        let commentsData = [];
-        snapshot.forEach(doc => commentsData.push({ id: doc.id, ...doc.data() }));
-
-        commentsData.sort((a, b) => b.timestamp - a.timestamp);
-
-        if (commentsData.length === 0) {
-            list.innerHTML = `<p style="opacity:0.5; padding:10px;">Henüz yorum yok. İlk sen yaz!</p>`;
+        list.innerHTML = "";
+        
+        if (snapshot.empty) {
+            list.innerHTML = `<p style="opacity:0.5; padding:10px;">Henüz yorum yok.</p>`;
             return;
         }
 
-        list.innerHTML = commentsData.map((c) => `
-            <div class="single-comment">
+        snapshot.forEach(docSnap => {
+            const c = docSnap.data();
+            const commentId = docSnap.id;
+            const div = document.createElement('div');
+            div.className = 'single-comment';
+            div.innerHTML = `
                 <div><strong>@${c.user}:</strong> ${c.text}</div>
                 <div class="comment-actions">
-                    <button class="action-btn ${c.likedBy?.includes(currentUser) ? 'liked' : ''}" onclick="toggleLike(${movieId}, '${c.id}')">
+                    <button class="action-btn" onclick="toggleLike('${movieId}', '${commentId}')">
                         <i class="fas fa-heart"></i> ${c.likes || 0}
                     </button>
-                    <button class="action-btn" onclick="showReplyInput('${c.id}')">
-                        <i class="fas fa-reply"></i> Yanıtla
-                    </button>
                 </div>
-                <div class="replies-container">
-                    ${(c.replies || []).map(r => `<div class="single-reply"><strong>@${r.user}:</strong> ${r.text}</div>`).join('')}
-                </div>
-                <div class="reply-input-wrapper" id="reply-wrapper-${c.id}" style="display:none; margin-top:10px;">
-                    <input type="text" placeholder="Yanıtın..." id="reply-input-${c.id}" style="width:70%; background:#1a202c; border:1px solid #333; color:white; padding:5px; border-radius:5px;">
-                    <button onclick="addReply(${movieId}, '${c.id}')" style="background:var(--primary-blue); color:black; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">Gönder</button>
-                </div>
-            </div>`).join('');
-    }, (err) => console.error("Yorum dinleme hatası:", err));
+            `;
+            list.appendChild(div);
+        });
+    }, (err) => console.error("Hata:", err));
 }
 
 async function addComment() {
     const input = document.getElementById('user-comment');
-    const modal = document.getElementById('movie-modal');
-    const movieId = modal.getAttribute('data-current-id');
+    const movieId = document.getElementById('movie-modal').getAttribute('data-current-id');
     
-    if(!input.value.trim()) return;
+    if(!input.value.trim() || !movieId) return;
 
     const newComment = {
         user: currentUser || "Misafir",
         text: input.value,
         likes: 0,
         likedBy: [],
-        replies: [],
         timestamp: Date.now()
     };
 
     try {
-        const commentsRef = collection(db, 'comments', `movie_${movieId}`);
-        await addDoc(commentsRef, newComment); // firebase.addDoc değil, sadece addDoc
+        await addDoc(collection(db, 'comments', `movie_${movieId}`, 'items'), newComment);
         input.value = "";
-    } catch (e) {
-        console.error("Yorum eklenemedi: ", e);
-    }
+    } catch (e) { console.error("Ekleme hatası:", e); }
 }
 
-async function toggleLike(movieId, commentId) {
-    if(!currentUser) return alert("Beğenmek için giriş yapmalısın!");
-    
-    const docRef = firebase.doc(db, 'artifacts', appId, 'public', 'data', `comments_${movieId}`, commentId);
-    const docSnap = await firebase.getDoc(docRef);
-    
-    if (docSnap.exists()) {
-        const data = docSnap.data();
-        let likedBy = data.likedBy || [];
-        let likes = data.likes || 0;
-        
-        const userIdx = likedBy.indexOf(currentUser);
-        if(userIdx === -1) {
-            likedBy.push(currentUser);
-            likes++;
-        } else {
-            likedBy.splice(userIdx, 1);
-            likes--;
-        }
-        
-        await firebase.updateDoc(docRef, { likedBy, likes });
-    }
-}
-
-async function addReply(movieId, commentId) {
-    const input = document.getElementById(`reply-input-${commentId}`);
-    if(!input.value.trim()) return;
-
-    const docRef = firebase.doc(db, 'artifacts', appId, 'public', 'data', `comments_${movieId}`, commentId);
-    const docSnap = await firebase.getDoc(docRef);
-
-    if (docSnap.exists()) {
-        const replies = docSnap.data().replies || [];
-        replies.push({
-            user: currentUser || "Misafir",
-            text: input.value
-        });
-        await firebase.updateDoc(docRef, { replies });
-        input.value = "";
-    }
-}
-
-function showReplyInput(id) {
-    const el = document.getElementById(`reply-wrapper-${id}`);
-    el.style.display = el.style.display === 'none' ? 'block' : 'none';
-}
-
+// 6. DİĞER KONTROLLER
 function setMainFilter(type, element) {
     document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
     if(element) element.classList.add('active');
     currentType = type;
     applyFilters();
-}
-
-function filterByGenre(genre) {
-    currentGenre = genre;
-    applyFilters();
-}
-
-function showFavorites(element) {
-    setMainFilter('favorites', element);
 }
 
 function toggleWatchlist(id) {
@@ -310,6 +219,24 @@ function handleAuth() {
     location.reload();
 }
 
+// 7. WINDOW BINDING (DIŞA AÇILAN KAPI)
+// Bu kısım en sonda olmalı! HTML'den çağrılan her şeyi buraya ekliyoruz.
+window.openDetails = openDetails;
+window.addComment = addComment;
+window.setMainFilter = setMainFilter;
+window.toggleWatchlist = toggleWatchlist;
+window.handleAuth = handleAuth;
+window.openAuthModal = openAuthModal;
+window.showFavorites = () => setMainFilter('favorites');
+window.closeModal = () => {
+    document.getElementById('movie-modal').style.display = "none";
+    document.body.style.overflow = 'auto';
+};
+window.closeAuthModal = () => {
+    document.getElementById('auth-modal').style.display = 'none';
+};
+
+// Sayfa ilk yüklendiğinde yapılacaklar
 window.addEventListener('DOMContentLoaded', () => {
     const logo = document.getElementById('main-logo');
     const wrapper = document.getElementById('site-wrapper');
@@ -324,14 +251,6 @@ window.addEventListener('DOMContentLoaded', () => {
             applyFilters(); 
             document.body.style.overflow = 'auto'; 
         }, 800); 
-    }, 2000); 
+    }, 1000); 
 });
-
-window.onclick = function(event) {
-    if (event.target.classList.contains('modal')) {
-        event.target.style.display = "none";
-        document.body.style.overflow = 'auto';
-        if (currentUnsubscribe) currentUnsubscribe();
-    }
-}
 
