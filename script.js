@@ -85,8 +85,6 @@ const initAuth = async () => {
 };
 
 
-});
-
 initAuth();
 
 function applyFilters() {
