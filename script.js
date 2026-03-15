@@ -95,121 +95,131 @@ function applyFilters() {
 
     renderCards(filtered);
 }
-
 function renderCards(data) {
     const movieGrid = document.getElementById('movie-grid');
-    movieGrid.innerHTML = data.map(movie => {
-        const isFav = watchlist.includes(movie.id);
-        return `
-            <div class="movie-card" onclick="openDetails(${movie.id})">
-                <div class="card-image">
-                    <img src="${movie.image}" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/300x450?text=Afiş+Yok'">
-                    <div class="card-overlay">
-                        <button class="watchlist-btn" onclick="event.stopPropagation(); toggleWatchlist(${movie.id})">
-                            <i class="${isFav ? 'fas' : 'far'} fa-clock"></i>
-                        </button>
-                    </div>
+    movieGrid.innerHTML = data.map(movie => `
+        <div class="movie-card" onclick="openDetails(${movie.id})">
+            <div class="card-image">
+                <img src="${movie.image}" alt="${movie.title}">
+                <div class="card-overlay">
+                    <button class="watchlist-btn" onclick="event.stopPropagation(); toggleWatchlist(${movie.id})">
+                        <i class="${watchlist.includes(movie.id) ? 'fas' : 'far'} fa-clock"></i>
+                    </button>
                 </div>
-                <div class="card-info">
-                    <h3>${movie.title}</h3>
-                    <div class="meta"><span>${movie.year}</span><span><i class="fas fa-star"></i> ${movie.rating}</span></div>
-                    <span class="genre">${movie.genre}</span>
-                </div>
-            </div>`;
-    }).join('');
+            </div>
+            <div class="card-info">
+                <h3>${movie.title}</h3>
+                <div class="meta"><span>${movie.year}</span><span><i class="fas fa-star"></i> ${movie.rating}</span></div>
+            </div>
+        </div>`).join('');
 }
 
-// 4. MODAL VE DETAYLAR
-
+/* --- DETAY VE YORUM SİSTEMİ (FIREBASE) --- */
 function openDetails(id) {
     const movie = movies.find(m => m.id === id);
     if(!movie) return;
 
     document.getElementById('modal-title').innerText = movie.title;
     document.getElementById('modal-img').src = movie.image;
-    document.getElementById('modal-meta').innerText = `${movie.year} | ${movie.genre} | IMDB: ${movie.rating}`;
     document.getElementById('modal-desc').innerText = movie.desc;
     document.getElementById('movie-modal').setAttribute('data-current-id', id);
     
-    listenToComments(id); // Yorumları yükle
-    
+    listenToComments(id); // Yorumları Firebase'den canlı dinle
     document.getElementById('movie-modal').style.display = "block";
-    document.body.style.overflow = 'hidden';
 }
-
-function openAuthModal() {
-    document.getElementById('auth-modal').style.display = 'flex';
-}
-
-// 5. FIREBASE YORUM SİSTEMİ
 
 function listenToComments(movieId) {
-    if (currentUnsubscribe) currentUnsubscribe(); // Eski dinleyiciyi temizle
-    
-    // Firestore'da 'comments/movie_66/items' gibi bir yola bakar
-    const commentsRef = collection(db, 'comments', `movie_${movieId}`, 'items');
-    const q = query(commentsRef, orderBy("timestamp", "desc"));
+    if (currentUnsubscribe) currentUnsubscribe();
+    // Yorumları 'comments/movie_ID/items' yolundan çekiyoruz
+    const q = query(collection(db, 'comments', `movie_${movieId}`, 'items'), orderBy("timestamp", "desc"));
 
     currentUnsubscribe = onSnapshot(q, (snapshot) => {
         const list = document.getElementById('comments-list');
-        list.innerHTML = "";
-        
-        if (snapshot.empty) {
-            list.innerHTML = `<p style="opacity:0.5; padding:10px;">Henüz yorum yok.</p>`;
-            return;
-        }
-
-        snapshot.forEach(docSnap => {
+        list.innerHTML = snapshot.docs.map(docSnap => {
             const c = docSnap.data();
-            const commentId = docSnap.id;
-            const div = document.createElement('div');
-            div.className = 'single-comment';
-            div.innerHTML = `
+            const cid = docSnap.id;
+            const hasLiked = c.likedBy?.includes(currentUser);
+            
+            return `
+            <div class="single-comment">
                 <div><strong>@${c.user}:</strong> ${c.text}</div>
                 <div class="comment-actions">
-                    <button class="action-btn" onclick="toggleLike('${movieId}', '${commentId}')">
+                    <button class="action-btn ${hasLiked ? 'liked' : ''}" onclick="toggleLike('${movieId}', '${cid}')">
                         <i class="fas fa-heart"></i> ${c.likes || 0}
                     </button>
+                    <button class="action-btn" onclick="showReplyInput('${cid}')">
+                        <i class="fas fa-reply"></i> Yanıtla
+                    </button>
                 </div>
-            `;
-            list.appendChild(div);
-        });
-    }, (err) => console.error("Hata:", err));
+                <div class="replies-container">
+                    ${(c.replies || []).map(r => `<div class="single-reply"><strong>@${r.user}:</strong> ${r.text}</div>`).join('')}
+                </div>
+                <div class="reply-input-wrapper" id="reply-wrapper-${cid}" style="display:none; margin-top:10px;">
+                    <input type="text" placeholder="Yanıtın..." id="reply-input-${cid}">
+                    <button onclick="addReply('${movieId}', '${cid}')">Gönder</button>
+                </div>
+            </div>`;
+        }).join('');
+    });
 }
 
+// YENİ YORUM EKLEME
 async function addComment() {
     const input = document.getElementById('user-comment');
     const movieId = document.getElementById('movie-modal').getAttribute('data-current-id');
-    
-    if(!input.value.trim() || !movieId) return;
+    if(!input.value.trim() || !currentUser) return alert("Önce giriş yap kanka!");
 
-    const newComment = {
-        user: currentUser || "Misafir",
+    await addDoc(collection(db, 'comments', `movie_${movieId}`, 'items'), {
+        user: currentUser,
         text: input.value,
         likes: 0,
         likedBy: [],
+        replies: [],
         timestamp: Date.now()
-    };
-
-    try {
-        await addDoc(collection(db, 'comments', `movie_${movieId}`, 'items'), newComment);
-        input.value = "";
-    } catch (e) { console.error("Ekleme hatası:", e); }
+    });
+    input.value = "";
 }
 
-// 6. DİĞER KONTROLLER
-function setMainFilter(type, element) {
-    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-    if(element) element.classList.add('active');
-    currentType = type;
-    applyFilters();
+// BEĞENİ ÖZELLİĞİ (FIREBASE)
+async function toggleLike(movieId, commentId) {
+    if(!currentUser) return alert("Beğenmek için giriş yap!");
+    const dRef = doc(db, 'comments', `movie_${movieId}`, 'items', commentId);
+    const dSnap = await getDoc(dRef);
+    const data = dSnap.data();
+
+    const hasLiked = data.likedBy?.includes(currentUser);
+    await updateDoc(dRef, {
+        likedBy: hasLiked ? arrayRemove(currentUser) : arrayUnion(currentUser),
+        likes: hasLiked ? (data.likes - 1) : (data.likes + 1)
+    });
 }
 
-function toggleWatchlist(id) {
-    const index = watchlist.indexOf(id);
-    index === -1 ? watchlist.push(id) : watchlist.splice(index, 1);
-    localStorage.setItem('nextwatch_favorites', JSON.stringify(watchlist));
-    applyFilters();
+// CEVAP VERME ÖZELLİĞİ (FIREBASE)
+async function addReply(movieId, commentId) {
+    const input = document.getElementById(`reply-input-${commentId}`);
+    if(!input.value.trim()) return;
+
+    const dRef = doc(db, 'comments', `movie_${movieId}`, 'items', commentId);
+    await updateDoc(dRef, {
+        replies: arrayUnion({
+            user: currentUser || "Misafir",
+            text: input.value,
+            timestamp: Date.now()
+        })
+    });
+    input.value = "";
+}
+
+/* --- PROFİL VE AUTH --- */
+function handleProfileClick() {
+    if(currentUser) {
+        if(confirm(`Çıkış yapmak istiyor musun ${currentUser}?`)) {
+            localStorage.removeItem('activeUser');
+            location.reload();
+        }
+    } else {
+        document.getElementById('auth-modal').style.display = "block";
+    }
 }
 
 function handleAuth() {
@@ -219,38 +229,39 @@ function handleAuth() {
     location.reload();
 }
 
-// 7. WINDOW BINDING (DIŞA AÇILAN KAPI)
-// Bu kısım en sonda olmalı! HTML'den çağrılan her şeyi buraya ekliyoruz.
+/* --- WINDOW EXPORTS (HTML'den erişim için şart!) --- */
 window.openDetails = openDetails;
 window.addComment = addComment;
-window.setMainFilter = setMainFilter;
-window.toggleWatchlist = toggleWatchlist;
+window.toggleLike = toggleLike;
+window.addReply = addReply;
+window.showReplyInput = (id) => {
+    const el = document.getElementById(`reply-wrapper-${id}`);
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+};
 window.handleAuth = handleAuth;
-window.openAuthModal = openAuthModal;
-window.showFavorites = () => setMainFilter('favorites');
-window.closeModal = () => {
-    document.getElementById('movie-modal').style.display = "none";
-    document.body.style.overflow = 'auto';
+window.handleProfileClick = handleProfileClick;
+window.setMainFilter = (t, e) => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    if(e) e.classList.add('active');
+    currentType = t;
+    applyFilters();
 };
-window.closeAuthModal = () => {
-    document.getElementById('auth-modal').style.display = 'none';
+window.showFavorites = () => { currentType = 'favorites'; applyFilters(); };
+window.toggleWatchlist = (id) => {
+    const idx = watchlist.indexOf(id);
+    idx === -1 ? watchlist.push(id) : watchlist.splice(idx, 1);
+    localStorage.setItem('nextwatch_favorites', JSON.stringify(watchlist));
+    applyFilters();
 };
+window.closeModal = () => { document.getElementById('movie-modal').style.display = "none"; document.body.style.overflow = 'auto'; };
 
-// Sayfa ilk yüklendiğinde yapılacaklar
+/* --- AÇILIŞ --- */
 window.addEventListener('DOMContentLoaded', () => {
-    const logo = document.getElementById('main-logo');
-    const wrapper = document.getElementById('site-wrapper');
-
     setTimeout(() => {
-        if(logo) {
-            logo.classList.remove('logo-center');
-            logo.classList.add('logo-nav');
-        }
+        document.getElementById('main-logo').className = 'logo-nav';
         setTimeout(() => {
-            if(wrapper) wrapper.classList.add('show-content');
-            applyFilters(); 
-            document.body.style.overflow = 'auto'; 
-        }, 800); 
-    }, 1000); 
+            document.getElementById('site-wrapper').classList.add('show-content');
+            applyFilters();
+        }, 800);
+    }, 1000);
 });
-
