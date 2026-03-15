@@ -211,12 +211,13 @@ function listenToComments(movieId) {
 
 async function addComment() {
     const input = document.getElementById('user-comment');
-    const movieId = document.getElementById('movie-modal').getAttribute('data-current-id');
-    if(!input.value.trim() || !currentAuthUser) return;
+    const modal = document.getElementById('movie-modal');
+    const movieId = modal.getAttribute('data-current-id');
+    
+    if(!input.value.trim()) return;
 
     const newComment = {
         user: currentUser || "Misafir",
-        userId: currentAuthUser.uid,
         text: input.value,
         likes: 0,
         likedBy: [],
@@ -224,9 +225,13 @@ async function addComment() {
         timestamp: Date.now()
     };
 
-    const commentsRef = firebase.collection(db, 'artifacts', appId, 'public', 'data', `comments_${movieId}`);
-    await firebase.addDoc(commentsRef, newComment);
-    input.value = "";
+    try {
+        const commentsRef = collection(db, 'comments', `movie_${movieId}`);
+        await addDoc(commentsRef, newComment); // firebase.addDoc değil, sadece addDoc
+        input.value = "";
+    } catch (e) {
+        console.error("Yorum eklenemedi: ", e);
+    }
 }
 
 async function toggleLike(movieId, commentId) {
