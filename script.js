@@ -10,7 +10,6 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { db } from "./firebase-config.js";
 
-// HTML'den erişebilmek için fonksiyonları window objesine bağlıyoruz
 window.setMainFilter = setMainFilter;
 window.filterByGenre = filterByGenre;
 window.showFavorites = showFavorites;
