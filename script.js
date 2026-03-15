@@ -1,10 +1,9 @@
 
-// 1. MODÜLLERİ İÇERİ ALMA
-// Firebase'in sunduğu özellikleri ve kendi ayarlarımızı çekiyoruz.
 import { 
-    collection, addDoc, onSnapshot, query, orderBy, doc, getDoc, updateDoc 
+    collection, addDoc, onSnapshot, query, orderBy, doc, getDoc, updateDoc, arrayUnion, arrayRemove 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { db } from "./firebase-config.js";
+
 const movies = [
     { id: 1, title: "Interstellar", year: 2014, rating: 8.7, genre: "Bilim Kurgu", image: "img/interstellar.jpg", type: "Film", desc: "Dünya yaşanmaz bir hal alınca bir grup astronot yeni bir yuva bulmak için yola çıkar. Satürn yakınlarındaki bir solucan deliğinden geçerek bilinmez galaksilere adım atarlar. Zaman ve sevginin boyutlarını aşan epik bir yolculuk başlar." },
     { id: 2, title: "Inception", year: 2010, rating: 8.8, genre: "Aksiyon", image: "img/inception.jpg", type: "Dizi", desc: "Rüyalar alemi, bir hırsızın en değerli sırları çalabileceği en savunmasız yerdir. Dom Cobb, bu tehlikeli dünyada bir fikri çalmak yerine onu yerleştirmekle görevlendirilir. Gerçeklik ile rüya arasındaki çizgi hiç bu kadar bulanık olmamıştı." },
@@ -73,26 +72,22 @@ const movies = [
     { id: 65, title: "Dune", year: 2021, rating: 8.0, genre: "Bilim Kurgu", image: "img/dune.jpg", type: "Film", desc: "Uzak bir gelecekte genç Paul Atreides, evrenin en değerli kaynağı için verilen mücadelede kaderini keşfeder." },
     { id: 66, title: "Joker", year: 2019, rating: 8.4, genre: "Dram", image: "img/joker.jpg", type: "Film", desc: "Toplum tarafından dışlanan Arthur Fleck'in yavaş yavaş Gotham'ın en korkulan suçlularından biri olan Joker'e dönüşmesini anlatır." }
 ];
-
 let currentType = 'all'; 
 let currentGenre = 'all'; 
 let watchlist = JSON.parse(localStorage.getItem('nextwatch_favorites')) || [];
 let currentUser = localStorage.getItem('activeUser') || null;
-let currentUnsubscribe = null; // Yorum dinleyicisini kapatmak için
+let currentUnsubscribe = null;
 
-// 3. ANA FONKSİYONLAR (FİLTRELEME VE GÖSTERİM)
-
+/* --- FİLTRELEME VE KARTLAR --- */
 function applyFilters() {
     const movieGrid = document.getElementById('movie-grid');
     if(!movieGrid) return;
-
     const filtered = movies.filter(item => {
-        const isFavoriteView = currentType === 'favorites';
-        const typeMatch = isFavoriteView ? watchlist.includes(item.id) : (currentType === 'all' || item.type === currentType);
+        const isFav = currentType === 'favorites';
+        const typeMatch = isFav ? watchlist.includes(item.id) : (currentType === 'all' || item.type === currentType);
         const genreMatch = (currentGenre === 'all' || item.genre === currentGenre);
         return typeMatch && genreMatch;
     });
-
     renderCards(filtered);
 }
 function renderCards(data) {
