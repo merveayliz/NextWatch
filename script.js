@@ -84,9 +84,7 @@ const initAuth = async () => {
     } catch (err) { console.error("Auth Hatası:", err); }
 };
 
-firebase.onAuthStateChanged(auth, (user) => {
-    currentAuthUser = user;
-    console.log("Firebase Auth Aktif:", user?.uid);
+
 });
 
 initAuth();
