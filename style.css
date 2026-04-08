@@ -13,7 +13,6 @@ body {
     overflow: hidden;
 }
 
-/* Scrollbar Tasarımı (Daha şık bir görünüm için) */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg-color); }
 ::-webkit-scrollbar-thumb { 
