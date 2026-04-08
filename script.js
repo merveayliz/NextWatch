@@ -1,7 +1,9 @@
 
 import { 
     collection, addDoc, onSnapshot, query, orderBy, doc, getDoc, updateDoc, arrayUnion, arrayRemove 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+}
+
+from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { db } from "./firebase-config.js";
 
 const movies = [
@@ -72,13 +74,13 @@ const movies = [
     { id: 65, title: "Dune", year: 2021, rating: 8.0, genre: "Bilim Kurgu", image: "img/dune.jpg", type: "Film", desc: "Uzak bir gelecekte genç Paul Atreides, evrenin en değerli kaynağı için verilen mücadelede kaderini keşfeder." },
     { id: 66, title: "Joker", year: 2019, rating: 8.4, genre: "Dram", image: "img/joker.jpg", type: "Film", desc: "Toplum tarafından dışlanan Arthur Fleck'in yavaş yavaş Gotham'ın en korkulan suçlularından biri olan Joker'e dönüşmesini anlatır." }
 ];
+
 let currentType = 'all'; 
 let currentGenre = 'all'; 
 let watchlist = JSON.parse(localStorage.getItem('nextwatch_favorites')) || [];
 let currentUser = localStorage.getItem('activeUser') || null;
 let currentUnsubscribe = null;
 
-/* --- FİLTRELEME VE KARTLAR --- */
 function applyFilters() {
     const movieGrid = document.getElementById('movie-grid');
     if(!movieGrid) return;
@@ -90,6 +92,7 @@ function applyFilters() {
     });
     renderCards(filtered);
 }
+
 function renderCards(data) {
     const movieGrid = document.getElementById('movie-grid');
     movieGrid.innerHTML = data.map(movie => `
@@ -109,7 +112,6 @@ function renderCards(data) {
         </div>`).join('');
 }
 
-/* --- DETAY VE YORUM SİSTEMİ (FIREBASE) --- */
 function openDetails(id) {
     const movie = movies.find(m => m.id === id);
     if(!movie) return;
@@ -119,13 +121,12 @@ function openDetails(id) {
     document.getElementById('modal-desc').innerText = movie.desc;
     document.getElementById('movie-modal').setAttribute('data-current-id', id);
     
-    listenToComments(id); // Yorumları Firebase'den canlı dinle
+    listenToComments(id); 
     document.getElementById('movie-modal').style.display = "block";
 }
 
 function listenToComments(movieId) {
     if (currentUnsubscribe) currentUnsubscribe();
-    // Yorumları 'comments/movie_ID/items' yolundan çekiyoruz
     const q = query(collection(db, 'comments', `movie_${movieId}`, 'items'), orderBy("timestamp", "desc"));
 
     currentUnsubscribe = onSnapshot(q, (snapshot) => {
@@ -158,7 +159,6 @@ function listenToComments(movieId) {
     });
 }
 
-// YENİ YORUM EKLEME
 async function addComment() {
     const input = document.getElementById('user-comment');
     const movieId = document.getElementById('movie-modal').getAttribute('data-current-id');
@@ -175,7 +175,6 @@ async function addComment() {
     input.value = "";
 }
 
-// BEĞENİ ÖZELLİĞİ (FIREBASE)
 async function toggleLike(movieId, commentId) {
     if(!currentUser) return alert("Beğenmek için giriş yap!");
     const dRef = doc(db, 'comments', `movie_${movieId}`, 'items', commentId);
@@ -189,7 +188,6 @@ async function toggleLike(movieId, commentId) {
     });
 }
 
-// CEVAP VERME ÖZELLİĞİ (FIREBASE)
 async function addReply(movieId, commentId) {
     const input = document.getElementById(`reply-input-${commentId}`);
     if(!input.value.trim()) return;
@@ -205,7 +203,6 @@ async function addReply(movieId, commentId) {
     input.value = "";
 }
 
-/* --- PROFİL VE AUTH --- */
 function handleProfileClick() {
     if(currentUser) {
         if(confirm(`Çıkış yapmak istiyor musun ${currentUser}?`)) {
@@ -224,7 +221,6 @@ function handleAuth() {
     location.reload();
 }
 
-/* --- WINDOW EXPORTS (HTML'den erişim için şart!) --- */
 window.openDetails = openDetails;
 window.addComment = addComment;
 window.toggleLike = toggleLike;
@@ -250,7 +246,6 @@ window.toggleWatchlist = (id) => {
 };
 window.closeModal = () => { document.getElementById('movie-modal').style.display = "none"; document.body.style.overflow = 'auto'; };
 
-/* --- AÇILIŞ --- */
 window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         document.getElementById('main-logo').className = 'logo-nav';
