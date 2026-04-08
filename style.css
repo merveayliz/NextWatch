@@ -260,10 +260,11 @@ header {
     outline: none;
     cursor: pointer;
 }
+
+
 #p{
     text-align: center; 
     margin-bottom: 20px;
-
 }
 
 .modal {
@@ -387,6 +388,27 @@ header {
 }
 
 @media (max-width: 480px) {
+    body {
+        /* Sayfanın donmasını engeller, kaydırmayı açar */
+        overflow-y: auto !important; 
+        height: auto !important;
+        position: relative;
+    }
+
+    .modal {
+        /* Modal (yorum kartı) açıldığında kendi içinde kayabilir */
+        overflow-y: auto; 
+        -webkit-overflow-scrolling: touch;
+        display: none; /* JS ile açılana kadar gizli kalır */
+    }
+
+    .modal-content {
+        /* Kartın ekrana sığmasını ve içeriğin kaybolmamasını sağlar */
+        max-height: none !important; 
+        margin: 20px auto; 
+        width: 90%;
+    }
+    
     .logo-center {
         transform: translate(-50%, -50%) scale(1.3); 
         width: 100%;
