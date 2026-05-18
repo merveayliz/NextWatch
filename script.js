@@ -1,7 +1,4 @@
-
-import { 
-    collection, addDoc, onSnapshot, query, orderBy, doc, getDoc, updateDoc, arrayUnion, arrayRemove 
-}
+import {  collection, addDoc, onSnapshot, query, orderBy, doc, getDoc, updateDoc, arrayUnion, arrayRemove }
 
 from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { db } from "./firebase-config.js";
@@ -93,6 +90,7 @@ function applyFilters() {
     renderCards(filtered);
 }
 
+
 function renderCards(data) {
     const movieGrid = document.getElementById('movie-grid');
     movieGrid.innerHTML = data.map(movie => `
@@ -112,6 +110,7 @@ function renderCards(data) {
         </div>`).join('');
 }
 
+
 function openDetails(id) {
     const movie = movies.find(m => m.id === id);
     if(!movie) return;
@@ -124,6 +123,7 @@ function openDetails(id) {
     listenToComments(id); 
     document.getElementById('movie-modal').style.display = "block";
 }
+
 
 function listenToComments(movieId) {
     if (currentUnsubscribe) currentUnsubscribe();
@@ -159,6 +159,7 @@ function listenToComments(movieId) {
     });
 }
 
+
 async function addComment() {
     const input = document.getElementById('user-comment');
     const movieId = document.getElementById('movie-modal').getAttribute('data-current-id');
@@ -174,6 +175,7 @@ async function addComment() {
     });
     input.value = "";
 }
+
 
 async function toggleLike(movieId, commentId) {
     if(!currentUser) return alert("Beğenmek için giriş yap!");
@@ -229,6 +231,7 @@ window.showReplyInput = (id) => {
     const el = document.getElementById(`reply-wrapper-${id}`);
     el.style.display = el.style.display === 'none' ? 'block' : 'none';
 };
+
 window.handleAuth = handleAuth;
 window.handleProfileClick = handleProfileClick;
 window.setMainFilter = (t, e) => {
@@ -237,6 +240,7 @@ window.setMainFilter = (t, e) => {
     currentType = t;
     applyFilters();
 };
+
 window.showFavorites = () => { currentType = 'favorites'; applyFilters(); };
 window.toggleWatchlist = (id) => {
     const idx = watchlist.indexOf(id);
@@ -244,6 +248,7 @@ window.toggleWatchlist = (id) => {
     localStorage.setItem('nextwatch_favorites', JSON.stringify(watchlist));
     applyFilters();
 };
+
 window.closeModal = () => { document.getElementById('movie-modal').style.display = "none"; document.body.style.overflow = 'auto'; };
 
 window.addEventListener('DOMContentLoaded', () => {
