@@ -6,20 +6,6 @@ NextWatch is a high-performance, dynamic streaming tracker application that allo
 
 ---
 
-## 📸 Interface Preview
-
-<p align="center">
-  <img src="img/desktop-preview.png" alt="NextWatch Desktop Interface" width="80%">
-</p>
-
-<p align="center">
-  <img src="img/mobile-preview.png" alt="NextWatch Mobile Interface" width="30%">&nbsp;&nbsp;&nbsp;&nbsp;
-
-  <img src="img/mobile-auth.png" alt="NextWatch Login Interface" width="30%">
-</p>
-
----
-
 ## 🔥 Key Core Features
 
 NextWatch provides a beautiful cross-platform experience with two distinct user flows: **Guest Mode** and **Authenticated Studio Mode**.
