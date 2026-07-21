@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+
 const firebaseConfig = {
   apiKey: "AIzaSyAAsVCcyKg33Zjx6zwNYfGRM42nCngnDmM",
   authDomain: "nextwatch-9bfb9.firebaseapp.com",
