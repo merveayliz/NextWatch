@@ -14,11 +14,11 @@ body {
 }
 
 ::-webkit-scrollbar { width: 8px; }
+
 ::-webkit-scrollbar-track { background: var(--bg-color); }
-::-webkit-scrollbar-thumb { 
-    background: #2d3748; 
-    border-radius: 10px; 
-}
+
+::-webkit-scrollbar-thumb {  background: #2d3748;  border-radius: 10px; }
+
 ::-webkit-scrollbar-thumb:hover { background: var(--primary-blue); }
 
 #main-logo {
