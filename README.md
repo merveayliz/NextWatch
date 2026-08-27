@@ -33,12 +33,3 @@ This project is built using modern frontend engineering methodologies, maximizin
 
 ---
 
-
-##💻 Developer Identity
-Crafted with passion and clean code architecture by Ayliz Azaklı
-
-LinkedIn: Ayliz Azaklı
-
-GitHub: @merveayliz
-
-⭐ If this architecture or design inspired you, feel free to drop a star on this repository! Your support drives more creative development.
