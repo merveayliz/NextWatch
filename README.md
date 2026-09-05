@@ -8,6 +8,7 @@ NextWatch is a high-performance, dynamic streaming tracker application that allo
 
 ## 🔥 Key Core Features
 
+
 NextWatch provides a beautiful cross-platform experience with two distinct user flows: **Guest Mode** and **Authenticated Studio Mode**.
 
 * **🔐 Firebase Authentication:** Users can instantly register and securely login via their Email and Password to unlock their personalized cloud-synced profile.
