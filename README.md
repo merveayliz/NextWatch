@@ -28,9 +28,4 @@ This project is built using modern frontend engineering methodologies, maximizin
 * **CSS3 / Tailwind CSS:** Custom dark-themed luxury components, smooth grid dynamics, and fully responsive layouts. *(Adjust if vanilla CSS/Tailwind was used)*
 * **JavaScript (ES6+):** Async/Await API handling, heavy state management for UI rendering, and dynamic routing logic.
 
-### Cloud Integration & Backend (BaaS)
-* **Firebase Auth:** Secure, token-based cloud authentication for managing active user state.
-* **Firebase Firestore / Realtime Database:** Distributed NoSQL database handling global movie reviews and individual persistent watchlists.
-
----
 
